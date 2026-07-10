@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistente de RH - Hvogel</title>
+    <style>
+        :root {
+            --brand-dark: #004682;
+            --brand-mid: #0077b6;
+            --brand-light: #48a9e6;
+            --bg: #f0f4f8;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --bot-bubble: #f8fafc;
+            --warn-bg: #fffbeb;
+            --warn-border: #f59e0b;
+            --warn-text: #92400e;
+            --success: #059669;
+            --shadow: 0 10px 40px rgba(0, 70, 130, 0.08);
+            --radius: 16px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(ellipse at top left, rgba(72, 169, 230, 0.12), transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(0, 70, 130, 0.06), transparent 50%),
+                var(--bg);
+        }
+
+        .app {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 1.25rem 1rem 1.5rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .brand img { height: 72px; width: auto; display: block; }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--brand-mid);
+            background: rgba(0, 119, 182, 0.08);
+            border: 1px solid rgba(0, 119, 182, 0.15);
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .btn-ghost, .btn-export {
+            padding: 0.5rem 0.9rem;
+            border: 1px solid var(--brand-dark);
+            border-radius: 10px;
+            background: transparent;
+            color: var(--brand-dark);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .btn-ghost:hover, .btn-export:hover:not(:disabled) {
+            background: var(--brand-dark);
+            color: #fff;
+        }
+
+        .btn-export:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        .export-group { display: flex; gap: 0.35rem; }
+
+        .chat-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-top: 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            min-height: 480px;
+        }
+
+        #chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        .welcome { text-align: center; padding: 2rem 1rem 1rem; color: var(--text-muted); }
+        .welcome h2 { margin: 0 0 0.5rem; font-size: 1.15rem; color: var(--brand-dark); font-weight: 700; }
+        .welcome p { margin: 0 0 1.25rem; font-size: 0.95rem; line-height: 1.5; }
+
+        .suggestions { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+
+        .suggestion {
+            font-size: 0.82rem;
+            padding: 0.45rem 0.85rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--brand-mid);
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .suggestion:hover {
+            border-color: var(--brand-light);
+            background: rgba(72, 169, 230, 0.08);
+        }
+
+        .msg {
+            display: flex;
+            flex-direction: column;
+            max-width: 88%;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .msg.user { align-self: flex-end; }
+        .msg.bot { align-self: flex-start; }
+
+        .bubble {
+            padding: 0.85rem 1rem;
+            border-radius: 14px;
+            line-height: 1.55;
+            font-size: 0.95rem;
+            word-break: break-word;
+        }
+
+        .msg.user .bubble {
+            background: linear-gradient(135deg, var(--brand-dark), var(--brand-mid));
+            color: #fff;
+            border-bottom-right-radius: 4px;
+            white-space: pre-wrap;
+        }
+
+        .msg.bot .bubble {
+            background: var(--bot-bubble);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg.bot.fallback .bubble {
+            background: var(--warn-bg);
+            border-color: rgba(245, 158, 11, 0.35);
+        }
+
+        .msg.bot .prefix {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--brand-mid);
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--brand-mid);
+            background: rgba(0, 119, 182, 0.07);
+            border: 1px solid rgba(0, 119, 182, 0.12);
+            padding: 0.3rem 0.65rem;
+            border-radius: 999px;
+            margin-bottom: 0.55rem;
+        }
+
+        .status-pill.writing { color: var(--brand-dark); background: rgba(0, 70, 130, 0.06); }
+
+        .status-pill.hidden { display: none; }
+
+        .status-icon {
+            width: 14px;
+            height: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-icon svg { width: 14px; height: 14px; }
+
+        .spinner {
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(0, 119, 182, 0.2);
+            border-top-color: var(--brand-mid);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .bot .content h1, .bot .content h2, .bot .content h3 {
+            font-size: 1rem; margin: 0.6rem 0 0.3rem; color: var(--brand-dark);
+        }
+        .bot .content p { margin: 0.4rem 0; }
+        .bot .content ul, .bot .content ol { margin: 0.4rem 0; padding-left: 1.4rem; }
+        .bot .content li { margin: 0.15rem 0; }
+        .bot .content code {
+            background: rgba(0, 70, 130, 0.07);
+            padding: 0.05rem 0.3rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .bot .content pre {
+            background: rgba(0, 70, 130, 0.06);
+            padding: 0.6rem;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .bot .content pre code { background: none; padding: 0; }
+        .bot .content a { color: var(--brand-mid); }
+
+        .fallback-banner {
+            display: none;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-top: 0.65rem;
+            padding: 0.55rem 0.7rem;
+            border-radius: 10px;
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            font-size: 0.82rem;
+            color: var(--warn-text);
+        }
+
+        .msg.bot.fallback .fallback-banner { display: flex; }
+
+        .typing-dots {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0.35rem 0 0.15rem;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--brand-light);
+            animation: bounce-dot 1.3s ease-in-out infinite;
+        }
+
+        .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes bounce-dot {
+            0%, 55%,  100% { transform: translateY(0); opacity: 0.35; }
+            28% { transform: translateY(-7px); opacity: 1; }
+        }
+
+        .msg.bot.waiting .content,
+        .msg.bot.waiting .fallback-banner { display: none; }
+
+        .msg-actions {
+            display: none;
+            align-items: center;
+            gap: 0.25rem;
+            margin-top: 0.45rem;
+            padding-left: 0.15rem;
+        }
+
+        .msg.bot.done .msg-actions { display: flex; }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            padding: 0.35rem 0.55rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #fff;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .action-btn svg { width: 15px; height: 15px; }
+
+        .action-btn:hover {
+            border-color: var(--brand-light);
+            color: var(--brand-mid);
+            background: rgba(72, 169, 230, 0.06);
+        }
+
+        .action-btn.active-up {
+            border-color: rgba(5, 150, 105, 0.4);
+            color: var(--success);
+            background: rgba(5, 150, 105, 0.08);
+        }
+
+        .action-btn.active-down {
+            border-color: rgba(220, 38, 38, 0.35);
+            color: #dc2626;
+            background: rgba(220, 38, 38, 0.06);
+        }
+
+        .action-divider {
+            width: 1px;
+            height: 18px;
+            background: var(--border);
+            margin: 0 0.15rem;
+        }
+
+        .input-area {
+            border-top: 1px solid var(--border);
+            padding: 1rem 1.25rem;
+            background: #fafbfc;
+        }
+
+        #form { display: flex; gap: 0.65rem; align-items: center; }
+
+        #input {
+            flex: 1;
+            padding: 0.85rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            background: #fff;
+        }
+
+        #input:focus {
+            border-color: var(--brand-light);
+            box-shadow: 0 0 0 3px rgba(72, 169, 230, 0.2);
+        }
+
+        #send {
+            padding: 0.85rem 1.35rem;
+            border: 0;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--brand-dark), var(--brand-mid));
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.15s, transform 0.1s;
+            white-space: nowrap;
+        }
+
+        #send:hover:not(:disabled) { opacity: 0.92; }
+        #send:active:not(:disabled) { transform: scale(0.98); }
+        #send:disabled { opacity: 0.45; cursor: default; }
+
+        .footer-note {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.75rem;
+        }
+
+        .app-footer {
+            margin-top: 1rem;
+            padding: 0.85rem 1rem;
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.35rem 0.5rem;
+        }
+
+        .app-footer .brand-name {
+            font-weight: 700;
+            color: var(--brand-dark);
+            letter-spacing: 0.02em;
+        }
+
+        .app-footer .sep {
+            color: var(--border);
+            user-select: none;
+        }
+
+        .app-footer .version {
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+            color: var(--brand-mid);
+            background: rgba(0, 119, 182, 0.07);
+            border: 1px solid rgba(0, 119, 182, 0.12);
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.72rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--brand-dark);
+            color: #fff;
+            padding: 0.65rem 1.1rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(0, 70, 130, 0.25);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 600px) {
+            .brand img { height: 56px; }
+            .header { padding: 0.85rem 1rem; }
+            .badge { display: none; }
+            .msg { max-width: 95%; }
+            .export-group .btn-export span.label { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <div class="brand">
+                <img src="/logo_hvogel_brand.png" alt="Hvogel - Fábrica de Software">
+            </div>
+            <div class="header-actions">
+                <span class="badge">Assistente de RH</span>
+                <div class="export-group">
+                    <button type="button" class="btn-export" id="exportTxt" disabled title="Exportar conversa em texto">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        <span class="label">TXT</span>
+                    </button>
+                    <button type="button" class="btn-export" id="exportPdf" disabled title="Exportar conversa em PDF">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+                        <span class="label">PDF</span>
+                    </button>
+                </div>
+                <button type="button" class="btn-ghost" id="newChat">Nova conversa</button>
+            </div>
+        </header>
+
+        <main class="chat-card">
+            <div id="chat">
+                <div class="welcome" id="welcome">
+                    <h2>Olá! Como posso ajudar?</h2>
+                    <p>Pergunte sobre férias, benefícios, licenças, jornada de trabalho e políticas internas da Hvogel.</p>
+                    <div class="suggestions">
+                        <button type="button" class="suggestion" data-q="Quantos dias de férias tenho direito?">Férias</button>
+                        <button type="button" class="suggestion" data-q="Quais são os benefícios oferecidos?">Benefícios</button>
+                        <button type="button" class="suggestion" data-q="Qual a licença-maternidade?">Licença-maternidade</button>
+                        <button type="button" class="suggestion" data-q="Como funciona o home office?">Home office</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <form id="form">
+                    <input id="input" type="text" placeholder="Digite sua pergunta sobre políticas de RH..." autocomplete="off" required>
+                    <button type="submit" id="send">Enviar</button>
+                </form>
+                <p class="footer-note">Respostas baseadas no manual oficial de RH da Hvogel</p>
+            </div>
+        </main>
+
+        <footer class="app-footer" id="appFooter">
+            <span>Desenvolvido por <span class="brand-name">Hvogel</span> Tecnologia Ltda.</span>
+            <span class="sep" aria-hidden="true">·</span>
+            <span class="version" id="appVersion">v1.0.0.0</span>
+        </footer>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+        const RAG_FALLBACK_MARKER = "Não encontrei essa informação nas políticas oficiais da Hvogel";
+
+        const chat = document.getElementById("chat");
+        const form = document.getElementById("form");
+        const input = document.getElementById("input");
+        const sendBtn = document.getElementById("send");
+        const newChatBtn = document.getElementById("newChat");
+        const exportTxtBtn = document.getElementById("exportTxt");
+        const exportPdfBtn = document.getElementById("exportPdf");
+        const toast = document.getElementById("toast");
+
+        let conversationLog = [];
+        let lastUserQuestion = "";
+
+        function getConversationId() {
+            let id = localStorage.getItem("conversationId");
+            if (!id) {
+                id = crypto.randomUUID();
+                localStorage.setItem("conversationId", id);
+            }
+            return id;
+        }
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add("show");
+            clearTimeout(showToast._timer);
+            showToast._timer = setTimeout(() => toast.classList.remove("show"), 2400);
+        }
+
+        function updateExportButtons() {
+            const hasMessages = conversationLog.length > 0;
+            exportTxtBtn.disabled = !hasMessages;
+            exportPdfBtn.disabled = !hasMessages;
+        }
+
+        function welcomeHtml() {
+            return `
+                <div class="welcome" id="welcome">
+                    <h2>Olá! Como posso ajudar?</h2>
+                    <p>Pergunte sobre férias, benefícios, licenças, jornada de trabalho e políticas internas da Hvogel.</p>
+                    <div class="suggestions">
+                        <button type="button" class="suggestion" data-q="Quantos dias de férias tenho direito?">Férias</button>
+                        <button type="button" class="suggestion" data-q="Quais são os benefícios oferecidos?">Benefícios</button>
+                        <button type="button" class="suggestion" data-q="Qual a licença-maternidade?">Licença-maternidade</button>
+                        <button type="button" class="suggestion" data-q="Como funciona o home office?">Home office</button>
+                    </div>
+                </div>`;
+        }
+
+        function hideWelcome() {
+            const w = document.getElementById("welcome");
+            if (w) w.remove();
+        }
+
+        function startNewConversation() {
+            localStorage.setItem("conversationId", crypto.randomUUID());
+            conversationLog = [];
+            lastUserQuestion = "";
+            chat.innerHTML = welcomeHtml();
+            bindSuggestions();
+            updateExportButtons();
+            input.focus();
+        }
+
+        function bindSuggestions() {
+            document.querySelectorAll(".suggestion").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    input.value = btn.dataset.q;
+                    form.requestSubmit();
+                });
+            });
+        }
+
+        newChatBtn.addEventListener("click", startNewConversation);
+        bindSuggestions();
+        updateExportButtons();
+
+        (async function loadAppInfo() {
+            try {
+                const res = await fetch("/api/info");
+                if (!res.ok) return;
+                const info = await res.json();
+                if (info.version) {
+                    document.getElementById("appVersion").textContent = "v" + info.version;
+                }
+            } catch { /* mantem versao estatica de fallback */ }
+        })();
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function renderMarkdown(md) {
+            const blocks = [];
+            let text = escapeHtml(md).replace(/```([\s\S]*?)```/g, (_, code) => {
+                blocks.push("<pre><code>" + code.replace(/^\n+|\n+$/g, "") + "</code></pre>");
+                return "\u0000" + (blocks.length - 1) + "\u0000";
+            });
+            text = text
+                .replace(/`([^`]+)`/g, "<code>$1</code>")
+                .replace(/^###\s+(.*)$/gm, "<h3>$1</h3>")
+                .replace(/^##\s+(.*)$/gm, "<h2>$1</h2>")
+                .replace(/^#\s+(.*)$/gm, "<h1>$1</h1>")
+                .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+                .replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>")
+                .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+                    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+            text = text
+                .replace(/(?:^[-*]\s+.*(?:\n|$))+/gm, m =>
+                    "<ul>" + m.trim().split(/\n/).map(l => "<li>" + l.replace(/^[-*]\s+/, "") + "</li>").join("") + "</ul>")
+                .replace(/(?:^\d+\.\s+.*(?:\n|$))+/gm, m =>
+                    "<ol>" + m.trim().split(/\n/).map(l => "<li>" + l.replace(/^\d+\.\s+/, "") + "</li>").join("") + "</ol>");
+            text = text
+                .split(/\n{2,}/)
+                .map(part => /^\s*<(h\d|ul|ol|pre)/.test(part) ? part : "<p>" + part.replace(/\n/g, "<br>") + "</p>")
+                .join("");
+            return text.replace(/\u0000(\d+)\u0000/g, (_, i) => blocks[Number(i)]);
+        }
+
+        function isRagFallback(text) {
+            return text.includes(RAG_FALLBACK_MARKER);
+        }
+
+        function createStatusPill(phase) {
+            const pill = document.createElement("div");
+            pill.className = "status-pill " + phase;
+            const icon = document.createElement("span");
+            icon.className = "status-icon";
+            const label = document.createElement("span");
+            label.className = "status-text";
+            if (phase === "searching") {
+                icon.innerHTML = '<span class="spinner"></span>';
+                label.textContent = "Consultando o manual de RH…";
+            } else {
+                icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+                label.textContent = "Redigindo resposta…";
+            }
+            pill.appendChild(icon);
+            pill.appendChild(label);
+            return pill;
+        }
+
+        function createTypingDots() {
+            const dots = document.createElement("span");
+            dots.className = "typing-dots";
+            dots.setAttribute("aria-label", "Aguardando resposta");
+            dots.innerHTML = "<span></span><span></span><span></span>";
+            return dots;
+        }
+
+        function svgCopy() {
+            return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+        }
+
+        function svgThumb(up) {
+            if (up) return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>';
+            return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/></svg>';
+        }
+
+        function buildMessageActions(messageId, getAnswerText) {
+            const actions = document.createElement("div");
+            actions.className = "msg-actions";
+
+            const copyBtn = document.createElement("button");
+            copyBtn.type = "button";
+            copyBtn.className = "action-btn";
+            copyBtn.title = "Copiar resposta";
+            copyBtn.innerHTML = svgCopy() + " Copiar";
+            copyBtn.addEventListener("click", async () => {
+                try {
+                    await navigator.clipboard.writeText(getAnswerText());
+                    showToast("Resposta copiada!");
+                } catch {
+                    showToast("Não foi possível copiar.");
+                }
+            });
+
+            const divider = document.createElement("span");
+            divider.className = "action-divider";
+
+            const upBtn = document.createElement("button");
+            upBtn.type = "button";
+            upBtn.className = "action-btn";
+            upBtn.title = "Resposta útil";
+            upBtn.innerHTML = svgThumb(true);
+            upBtn.addEventListener("click", () => submitFeedback(messageId, "up", upBtn, downBtn, getAnswerText()));
+
+            const downBtn = document.createElement("button");
+            downBtn.type = "button";
+            downBtn.className = "action-btn";
+            downBtn.title = "Resposta não útil";
+            downBtn.innerHTML = svgThumb(false);
+            downBtn.addEventListener("click", () => submitFeedback(messageId, "down", upBtn, downBtn, getAnswerText()));
+
+            actions.append(copyBtn, divider, upBtn, downBtn);
+            return actions;
+        }
+
+        async function submitFeedback(messageId, rating, upBtn, downBtn, getAnswerText) {
+            upBtn.classList.remove("active-up");
+            downBtn.classList.remove("active-down");
+            if (rating === "up") upBtn.classList.add("active-up");
+            else downBtn.classList.add("active-down");
+
+            const entry = conversationLog.find(e => e.messageId === messageId);
+            if (entry) entry.feedback = rating;
+
+            try {
+                await fetch("/chat/feedback", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        messageId,
+                        conversationId: getConversationId(),
+                        rating,
+                        question: lastUserQuestion,
+                        answer: getAnswerText()
+                    })
+                });
+                showToast(rating === "up" ? "Obrigado pelo feedback!" : "Feedback registrado. Vamos melhorar!");
+            } catch {
+                showToast("Feedback salvo localmente.");
+            }
+        }
+
+        function appendUserMessage(text) {
+            hideWelcome();
+            lastUserQuestion = text;
+            conversationLog.push({ role: "user", text });
+            updateExportButtons();
+
+            const msg = document.createElement("div");
+            msg.className = "msg user";
+            const bubble = document.createElement("div");
+            bubble.className = "bubble";
+            bubble.textContent = text;
+            msg.appendChild(bubble);
+            chat.appendChild(msg);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function appendBotMessage() {
+            hideWelcome();
+            const messageId = crypto.randomUUID();
+            const msg = document.createElement("div");
+            msg.className = "msg bot waiting";
+            msg.dataset.messageId = messageId;
+
+            const bubble = document.createElement("div");
+            bubble.className = "bubble";
+
+            const statusPill = createStatusPill("searching");
+            const label = document.createElement("span");
+            label.className = "prefix";
+            label.textContent = "Assistente Hvogel";
+            const content = document.createElement("span");
+            content.className = "content";
+            const fallbackBanner = document.createElement("div");
+            fallbackBanner.className = "fallback-banner";
+            fallbackBanner.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>Informação não encontrada no manual. Entre em contato com o RH.</span>';
+            const dots = createTypingDots();
+
+            bubble.append(statusPill, label, content, fallbackBanner, dots);
+            msg.appendChild(bubble);
+
+            let answerText = "";
+            const actions = buildMessageActions(messageId, () => answerText);
+            msg.appendChild(actions);
+
+            chat.appendChild(msg);
+            chat.scrollTop = chat.scrollHeight;
+
+            return {
+                messageId,
+                content,
+                dots,
+                msg,
+                statusPill,
+                setAnswerText: (t) => { answerText = t; },
+                getAnswerText: () => answerText
+            };
+        }
+
+        function setPhase(bot, phase) {
+            if (phase === "searching") {
+                bot.statusPill.className = "status-pill searching";
+                bot.statusPill.querySelector(".status-icon").innerHTML = '<span class="spinner"></span>';
+                bot.statusPill.querySelector(".status-text").textContent = "Consultando o manual de RH…";
+            } else if (phase === "writing") {
+                bot.statusPill.className = "status-pill writing";
+                bot.statusPill.querySelector(".status-icon").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+                bot.statusPill.querySelector(".status-text").textContent = "Redigindo resposta…";
+            } else {
+                bot.statusPill.className = "status-pill hidden";
+            }
+        }
+
+        function finishBotMessage(bot, botText) {
+            bot.dots.remove();
+            bot.msg.classList.remove("waiting");
+            setPhase(bot, "done");
+            bot.msg.classList.add("done");
+
+            const fallback = isRagFallback(botText);
+            bot.msg.classList.toggle("fallback", fallback);
+
+            conversationLog.push({
+                role: "bot",
+                text: botText,
+                messageId: bot.messageId,
+                fallback,
+                feedback: null
+            });
+            updateExportButtons();
+        }
+
+        async function sendMessage(message) {
+            sendBtn.disabled = true;
+            appendUserMessage(message);
+
+            const bot = appendBotMessage();
+            let botText = "";
+            let receivedFirstChunk = false;
+
+            function refreshBotBubble() {
+                const hasText = botText.trim().length > 0;
+                bot.msg.classList.toggle("waiting", !hasText);
+                if (hasText) {
+                    if (!receivedFirstChunk) {
+                        receivedFirstChunk = true;
+                        setPhase(bot, "writing");
+                    }
+                    bot.content.innerHTML = renderMarkdown(botText);
+                    bot.setAnswerText(botText);
+                }
+                chat.scrollTop = chat.scrollHeight;
+            }
+
+            try {
+                setPhase(bot, "searching");
+
+                const response = await fetch("/chat/stream", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Conversation-Id": getConversationId()
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                if (!response.ok) {
+                    bot.dots.remove();
+                    setPhase(bot, "done");
+                    bot.content.textContent = "Erro ao processar sua pergunta (" + response.status + ").";
+                    bot.msg.classList.add("done");
+                    return;
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let sseBuffer = "";
+
+                function decodeSseEvent(rawEvent) {
+                    const dataLines = [];
+                    for (const line of rawEvent.split("\n")) {
+                        if (line.startsWith("data:")) dataLines.push(line.slice(5));
+                    }
+                    return dataLines.join("\n");
+                }
+
+                function consumeSse(text, flush) {
+                    sseBuffer += text.replace(/\r\n/g, "\n");
+                    let sep;
+                    while ((sep = sseBuffer.indexOf("\n\n")) !== -1) {
+                        botText += decodeSseEvent(sseBuffer.slice(0, sep));
+                        sseBuffer = sseBuffer.slice(sep + 2);
+                    }
+                    if (flush && sseBuffer.length) {
+                        botText += decodeSseEvent(sseBuffer);
+                        sseBuffer = "";
+                    }
+                }
+
+                let done = false;
+                while (!done) {
+                    const { value, done: streamDone } = await reader.read();
+                    done = streamDone;
+                    if (value) {
+                        consumeSse(decoder.decode(value, { stream: true }), false);
+                        refreshBotBubble();
+                    }
+                }
+                consumeSse("", true);
+                refreshBotBubble();
+                finishBotMessage(bot, botText);
+            } catch {
+                bot.dots.remove();
+                setPhase(bot, "done");
+                bot.content.textContent = "Falha de rede. Verifique se o servidor está ativo.";
+                bot.msg.classList.add("done");
+            } finally {
+                sendBtn.disabled = false;
+                input.focus();
+                chat.scrollTop = chat.scrollHeight;
+            }
+        }
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const message = input.value.trim();
+            if (!message) return;
+            input.value = "";
+            await sendMessage(message);
+        });
+
+        function formatConversationPlain() {
+            const lines = ["Assistente de RH — Hvogel Tecnologia Ltda.", "Conversa exportada em " + new Date().toLocaleString("pt-BR"), ""];
+            for (const entry of conversationLog) {
+                const label = entry.role === "user" ? "Você" : "Assistente Hvogel";
+                lines.push(label + ":", entry.text, "");
+            }
+            return lines.join("\n");
+        }
+
+        exportTxtBtn.addEventListener("click", () => {
+            const blob = new Blob([formatConversationPlain()], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "conversa-hvogel-rh-" + new Date().toISOString().slice(0, 10) + ".txt";
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("Conversa exportada em TXT!");
+        });
+
+        exportPdfBtn.addEventListener("click", () => {
+            const win = window.open("", "_blank");
+            if (!win) {
+                showToast("Permita pop-ups para exportar PDF.");
+                return;
+            }
+
+            const rows = conversationLog.map(entry => {
+                const isUser = entry.role === "user";
+                const bg = isUser ? "#004682" : (entry.fallback ? "#fffbeb" : "#f8fafc");
+                const color = isUser ? "#fff" : "#1e293b";
+                const border = isUser ? "none" : "1px solid #e2e8f0";
+                const label = isUser ? "Você" : "Assistente Hvogel";
+                const safe = escapeHtml(entry.text).replace(/\n/g, "<br>");
+                return `<div style="margin-bottom:1rem;padding:0.85rem 1rem;border-radius:12px;background:${bg};color:${color};border:${border}">
+                    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;opacity:0.85">${label}</div>
+                    <div style="line-height:1.55;font-size:0.92rem">${safe}</div>
+                </div>`;
+            }).join("");
+
+            win.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+                <title>Conversa RH — Hvogel</title>
+                <style>
+                    @page { margin: 2cm; }
+                    body { font-family: Segoe UI, system-ui, sans-serif; color: #1e293b; max-width: 720px; margin: 0 auto; padding: 1.5rem; }
+                    h1 { color: #004682; font-size: 1.25rem; margin: 0 0 0.25rem; }
+                    .meta { color: #64748b; font-size: 0.85rem; margin-bottom: 1.5rem; }
+                    .footer { margin-top: 2rem; font-size: 0.75rem; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 0.75rem; }
+                </style></head><body>
+                <h1>Assistente de RH — Hvogel</h1>
+                <p class="meta">Exportado em ${new Date().toLocaleString("pt-BR")} · ID: ${getConversationId()}</p>
+                ${rows}
+                <p class="footer">Documento gerado automaticamente. Respostas baseadas no manual oficial de RH da Hvogel.</p>
+                </body></html>`);
+            win.document.close();
+            win.focus();
+            setTimeout(() => { win.print(); }, 400);
+            showToast("Use &quot;Salvar como PDF&quot; na janela de impressão.");
+        });
+    </script>
+</body>
+</html>
