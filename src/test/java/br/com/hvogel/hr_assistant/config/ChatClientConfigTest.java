@@ -18,6 +18,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
         "spring.ai.ollama.chat.enabled=false",
         "spring.ai.anthropic.api-key=test-key",
         "spring.ai.chat.memory.redis.initialize-schema=false",
+        "spring.datasource.password=test",
         "app.ingest.auto-on-startup=false",
         "app.info.version=1.0.0.0",
         "app.info.developer=Hvogel Tecnologia Ltda."

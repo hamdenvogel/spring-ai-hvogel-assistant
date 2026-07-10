@@ -1,0 +1,11 @@
+# Exemplo de overrides locais (properties).
+# Copie para application-local.properties (NAO versionado — veja .gitignore).
+# Ative com: --spring.profiles.active=anthropic,local
+
+spring.datasource.url=jdbc:postgresql://localhost:5439/ragdb
+spring.datasource.username=postgres
+spring.datasource.password=altere-esta-senha
+
+# spring.ai.chat.memory.redis.host=localhost
+# spring.ai.chat.memory.redis.port=6379
+# app.ingest.auto-on-startup=false

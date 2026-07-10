@@ -1,13 +1,12 @@
-# Exemplo de overrides locais.
-# Copie para application-local.yml (este arquivo NAO e versionado).
+# Exemplo de overrides locais (YAML).
+# Copie para application-local.yml (NAO versionado — veja .gitignore).
 # Ative com: --spring.profiles.active=anthropic,local
-# ou: SPRING_PROFILES_ACTIVE=anthropic,local
 
 spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5439/ragdb}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD}
 
 # Exemplo: desligar ingest automatico em desenvolvimento
 # app:

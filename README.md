@@ -22,21 +22,26 @@ Repositório: [hamdenvogel/spring-ai-hvogel-assistant](https://github.com/hamden
 
 ## Configuração (sem credenciais no Git)
 
-1. Copie o exemplo de ambiente:
+1. Copie o exemplo de ambiente e **preencha** chave/senha:
 
 ```powershell
 copy .env.example .env
 ```
 
-2. Preencha `ANTHROPIC_API_KEY` no arquivo `.env` (não versionado).
-
-3. (Opcional) Overrides locais:
+2. (Opcional) Overrides locais — escolha um:
 
 ```powershell
 copy src\main\resources\application-local.yml.example src\main\resources\application-local.yml
+# ou
+copy src\main\resources\application-local.properties.example src\main\resources\application-local.properties
 ```
 
-O arquivo `application-local.yml` está no `.gitignore`.
+Arquivos **não** versionados (`.gitignore`):
+- `.env`
+- `application-local.yml`
+- `application-local.properties`
+
+Senhas e `ANTHROPIC_API_KEY` **não** ficam hardcoded em `docker-compose.yml` / `application.yml` — só via variáveis de ambiente.
 
 ---
 
