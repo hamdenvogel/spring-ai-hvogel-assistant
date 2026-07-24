@@ -1,0 +1,17 @@
+# Profile cloud — ative junto com anthropic:
+# SPRING_PROFILES_ACTIVE=anthropic,cloud
+#
+# Segredos e URLs vêm só de variáveis de ambiente / Cloud Run (nunca no Git).
+
+spring:
+  data:
+    # Actuator / Spring Data Redis (Lettuce) — mesma URL do chat memory (Jedis).
+    # Sem isso o health tenta localhost:6379 e fica DOWN no Cloud Run.
+    redis:
+      url: ${SPRING_AI_CHAT_MEMORY_REDIS_URL}
+
+logging:
+  level:
+    br.com.hvogel.hv_assistant.chat.PromptLoggingAdvisor: INFO
+    root: INFO
+

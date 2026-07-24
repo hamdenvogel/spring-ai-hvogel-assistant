@@ -43,6 +43,8 @@ Desktop.ini
 .env
 .env.local
 .env.*.local
+.env.cloudrun.yaml
+.env.cloudrun.yml
 **/application-local.yml
 **/application-local.properties
 **/application-local.yaml
@@ -62,3 +64,7 @@ issues.json
 *.tmp
 *.swp
 *~
+
+# Docs Markdown na raiz: soh README no GitHub (mantem .md em src/)
+/*.md
+!/README.md

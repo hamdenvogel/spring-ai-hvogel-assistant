@@ -1,3 +1,7 @@
+# Cloud Run (e outros PaaS) injetam PORT; localmente permanece 8080.
+server:
+  port: ${PORT:8080}
+
 spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5439/ragdb}
@@ -5,7 +9,10 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD}
   ai:
     model:
-      embedding: ollama
+      embedding: openai
+    openai:
+      chat:
+        enabled: false           # chat fica na Anthropic; OpenAI so para embeddings
     vectorstore:
       pgvector:
         initialize-schema: true        # cria a extensao, a tabela e o indice no primeiro start
@@ -17,6 +24,11 @@ spring:
         redis:
           host: ${SPRING_AI_CHAT_MEMORY_REDIS_HOST:localhost}
           port: ${SPRING_AI_CHAT_MEMORY_REDIS_PORT:6379}
+          # URL completa (ex. rediss://default:SENHA@host:6379) — preferencial na nuvem
+          url: ${SPRING_AI_CHAT_MEMORY_REDIS_URL:}
+          username: ${SPRING_AI_CHAT_MEMORY_REDIS_USERNAME:}
+          password: ${SPRING_AI_CHAT_MEMORY_REDIS_PASSWORD:}
+          ssl: ${SPRING_AI_CHAT_MEMORY_REDIS_SSL:false}
           time-to-live: PT30M          # a conversa expira apos 30 min de inatividade
 
 # bloco proprio do projeto (nao e do framework)
@@ -36,4 +48,5 @@ app:
 # nivel DEBUG apenas para o advisor que loga prompt (IDA) e resposta (VOLTA)
 logging:
   level:
-    br.com.hvogel.hr_assistant.chat.PromptLoggingAdvisor: DEBUG
+    br.com.hvogel.hv_assistant.chat.PromptLoggingAdvisor: DEBUG
+
