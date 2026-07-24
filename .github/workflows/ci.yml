@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: Maven tests
+    runs-on: ubuntu-latest
+
+    services:
+      # Postgres + pgvector (mesma ideia do docker-compose local)
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: ragdb
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d ragdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Sem chaves reais — os testes usam test-key / mocks
+      ANTHROPIC_API_KEY: test-key
+      OPENAI_API_KEY: test-key
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/ragdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: test
+      SPRING_AI_CHAT_MEMORY_REDIS_HOST: localhost
+      SPRING_AI_CHAT_MEMORY_REDIS_PORT: "6379"
+      SPRING_PROFILES_ACTIVE: anthropic
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+
+      - name: Enable pgvector extension
+        env:
+          PGPASSWORD: test
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+          psql -h localhost -U postgres -d ragdb -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+      - name: Run tests
+        run: |
+          chmod +x mvnw
+          ./mvnw -B test
