@@ -24,6 +24,17 @@ docker pull ghcr.io/hamdenvogel/spring-ai-hvogel-assistant:v0.1.0
 
 Package: [ghcr.io/hamdenvogel/spring-ai-hvogel-assistant](https://github.com/hamdenvogel/spring-ai-hvogel-assistant/pkgs/container/spring-ai-hvogel-assistant)
 
+### CI/CD — o que cada gatilho faz
+
+> **PR só valida; `main` integra; tag `v*` publica e faz deploy.**
+
+| Gatilho | Ação |
+|---------|------|
+| Pull Request / push na `main` | CI (testes, package, Docker, scans) — **sem** deploy |
+| Tag `v*` (ex.: `v0.1.0`) | GitHub Release + imagem no GHCR + deploy no Cloud Run |
+
+Detalhes do fluxo e como versionar: [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ---
 
 ## Origem e créditos
