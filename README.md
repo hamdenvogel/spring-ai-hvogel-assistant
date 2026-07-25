@@ -16,6 +16,14 @@ Repositório: [hamdenvogel/spring-ai-hvogel-assistant](https://github.com/hamden
 
 Demo: https://hv-assistant-649100031966.us-central1.run.app
 
+### Imagem Docker (GHCR)
+
+```bash
+docker pull ghcr.io/hamdenvogel/spring-ai-hvogel-assistant:v0.1.0
+```
+
+Package: [ghcr.io/hamdenvogel/spring-ai-hvogel-assistant](https://github.com/hamdenvogel/spring-ai-hvogel-assistant/pkgs/container/spring-ai-hvogel-assistant)
+
 ---
 
 ## Origem e créditos
