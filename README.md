@@ -1,6 +1,7 @@
 # HV Assistant — Hvogel (Spring AI + RAG + Claude)
 
 ![CI](https://github.com/hamdenvogel/spring-ai-hvogel-assistant/actions/workflows/ci.yml/badge.svg)
+![Release](https://img.shields.io/github/v/release/hamdenvogel/spring-ai-hvogel-assistant?label=release)
 
 Assistente virtual de RH com **RAG** (Retrieval-Augmented Generation), ancorado no manual de políticas da **Hvogel Tecnologia Ltda.**
 
