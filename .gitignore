@@ -65,6 +65,7 @@ issues.json
 *.swp
 *~
 
-# Docs Markdown na raiz: soh README no GitHub (mantem .md em src/)
+# Docs Markdown na raiz: soh README e CONTRIBUTING no GitHub (mantem .md em src/)
 /*.md
 !/README.md
+!/CONTRIBUTING.md
