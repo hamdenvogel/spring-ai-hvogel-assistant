@@ -85,6 +85,57 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
+      - name: Build Docker image
+        run: docker build -t hv-assistant:ci .
+
+      - name: Start container
+        # --network host: o container enxerga Postgres/Redis dos services no localhost do runner.
+        # APP_INGEST_AUTO_ON_STARTUP=false: evita chamada real a OpenAI embeddings no boot.
+        run: |
+          docker run --detach --name hv-assistant-ci --network host \
+            -e ANTHROPIC_API_KEY=test-key \
+            -e OPENAI_API_KEY=test-key \
+            -e SPRING_PROFILES_ACTIVE=anthropic \
+            -e SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/ragdb \
+            -e SPRING_DATASOURCE_USERNAME=postgres \
+            -e SPRING_DATASOURCE_PASSWORD=test \
+            -e SPRING_AI_CHAT_MEMORY_REDIS_HOST=localhost \
+            -e SPRING_AI_CHAT_MEMORY_REDIS_PORT=6379 \
+            -e APP_INGEST_AUTO_ON_STARTUP=false \
+            hv-assistant:ci
+
+      - name: Check container health
+        shell: bash
+        run: |
+          for attempt in {1..45}; do
+            if curl --fail --silent --show-error http://localhost:8080/actuator/health; then
+              echo
+              echo "HV Assistant container is healthy."
+              exit 0
+            fi
+
+            if ! docker container inspect hv-assistant-ci --format '{{.State.Running}}' | grep -q true; then
+              echo "Container stopped before becoming healthy."
+              docker logs hv-assistant-ci
+              exit 1
+            fi
+
+            echo "Waiting for HV Assistant (attempt ${attempt}/45)..."
+            sleep 2
+          done
+
+          echo "Health check timed out."
+          docker logs hv-assistant-ci
+          exit 1
+
+      - name: Show container logs
+        if: always()
+        run: docker logs hv-assistant-ci
+
+      - name: Stop container
+        if: always()
+        run: docker rm --force hv-assistant-ci
+
       - name: Upload Surefire reports on failure
         if: failure()
         uses: actions/upload-artifact@v4
