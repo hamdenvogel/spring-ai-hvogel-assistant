@@ -1,5 +1,5 @@
 # Stage 1: compila o JAR
-FROM amazoncorretto:25-alpine AS build
+FROM amazoncorretto:26-alpine AS build
 WORKDIR /src
 RUN apk add --no-cache maven
 COPY pom.xml .
@@ -8,7 +8,7 @@ RUN mvn -q -DskipTests package \
 	&& mv target/hv-assistant-*.jar /src/app.jar
 
 # Stage 2: imagem final
-FROM amazoncorretto:25-alpine
+FROM amazoncorretto:26-alpine
 WORKDIR /app
 
 RUN addgroup -g 1001 -S appgroup && \
