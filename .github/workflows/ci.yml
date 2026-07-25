@@ -6,8 +6,8 @@ on:
   pull_request:
 
 jobs:
-  test:
-    name: Maven tests
+  build:
+    name: Build & test
     runs-on: ubuntu-latest
 
     services:
@@ -66,10 +66,24 @@ jobs:
           sudo apt-get install -y -qq postgresql-client
           psql -h localhost -U postgres -d ragdb -c "CREATE EXTENSION IF NOT EXISTS vector;"
 
-      - name: Run tests
+      - name: Build and test (package)
         run: |
           chmod +x mvnw
-          ./mvnw -B test
+          ./mvnw -B clean package
+
+      - name: Show generated jar
+        run: ls -lh target/*.jar
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: hv-assistant-jar
+          path: |
+            target/hv-assistant-*.jar
+            !target/*-sources.jar
+            !target/*-javadoc.jar
+          retention-days: 7
+          if-no-files-found: error
 
       - name: Upload Surefire reports on failure
         if: failure()
