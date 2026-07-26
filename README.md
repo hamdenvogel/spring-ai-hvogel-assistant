@@ -2,6 +2,7 @@
 
 ![CI](https://github.com/hamdenvogel/spring-ai-hvogel-assistant/actions/workflows/ci.yml/badge.svg)
 ![Release](https://img.shields.io/github/v/release/hamdenvogel/spring-ai-hvogel-assistant?label=release)
+![GHCR](https://img.shields.io/badge/GHCR-ghcr.io%2Fhamdenvogel%2Fspring--ai--hvogel--assistant-blue)
 
 Assistente virtual de RH com **RAG** (Retrieval-Augmented Generation), ancorado no manual de políticas da **Hvogel Tecnologia Ltda.**
 
@@ -30,8 +31,10 @@ Package: [ghcr.io/hamdenvogel/spring-ai-hvogel-assistant](https://github.com/ham
 
 | Gatilho | Ação |
 |---------|------|
-| Pull Request / push na `main` | CI (testes, package, Docker, scans) — **sem** deploy |
-| Tag `v*` (ex.: `v0.1.0`) | GitHub Release + imagem no GHCR + deploy no Cloud Run |
+| Pull Request / push na `main` | CI: Maven (+ Postgres/Redis), Docker, Gitleaks, Trivy — **sem** deploy |
+| Tag `v*` (ex.: `v0.1.0`) | GitHub Release (JAR) + imagem no GHCR + deploy no Cloud Run + health check |
+
+Autenticação no GCP via **Workload Identity Federation** (OIDC, sem chave JSON no repositório). Dependabot ativo para Maven, Actions e Docker.
 
 Detalhes do fluxo e como versionar: [CONTRIBUTING.md](CONTRIBUTING.md).
 
