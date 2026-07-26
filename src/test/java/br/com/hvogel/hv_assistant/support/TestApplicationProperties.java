@@ -11,7 +11,7 @@ public final class TestApplicationProperties {
             "spring.ai.openai.api-key=test-key",
             "spring.ai.chat.memory.redis.initialize-schema=false",
             "app.ingest.auto-on-startup=false",
-            "app.info.version=1.0.0.0",
+            "app.info.version=0.2.0",
             "app.info.developer=Hvogel Tecnologia Ltda."
     };
 

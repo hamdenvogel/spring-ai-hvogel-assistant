@@ -3,7 +3,7 @@ package br.com.hvogel.hv_assistant.config;
 import java.net.URI;
 import java.time.Duration;
 
-import br.com.hvogel.hv_assistant.chat.PromptLoggingAdvisor;
+import br.com.hvogel.hv_assistant.adapter.out.springai.PromptLoggingAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
