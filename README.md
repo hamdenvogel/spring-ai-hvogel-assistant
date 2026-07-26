@@ -20,7 +20,7 @@ Demo: https://hv-assistant-649100031966.us-central1.run.app
 ### Imagem Docker (GHCR)
 
 ```bash
-docker pull ghcr.io/hamdenvogel/spring-ai-hvogel-assistant:v0.1.0
+docker pull ghcr.io/hamdenvogel/spring-ai-hvogel-assistant:v0.2.0
 ```
 
 Package: [ghcr.io/hamdenvogel/spring-ai-hvogel-assistant](https://github.com/hamdenvogel/spring-ai-hvogel-assistant/pkgs/container/spring-ai-hvogel-assistant)
@@ -72,10 +72,16 @@ A base original usa o caso **Aurora Car Dealer** (`br.com.devsuperior`). Esta ev
 - Destaque visual quando o RAG não encontra informação (fallback)
 - Copiar resposta; feedback 👍/👎 (`POST /chat/feedback`)
 - Exportar conversa em TXT e PDF
-- `GET /api/info` para versão/desenvolvedor no footer
+- Contador de caracteres (máx. 200) no prompt
+- Modal **Sobre** (`GET /api/sobre`) via botão e clique na logo
+- Microanimações no header, logo e rodapé
+- `GET /api/info` para versão/desenvolvedor no footer (versão do Maven sem sufixo `-SNAPSHOT`)
+
+### Arquitetura
+- **Hexagonal (Ports & Adapters)** — domínio / application / adapters; detalhe em [ARQUITETURA-HEXAGONAL-HV-ASSISTANT.md](ARQUITETURA-HEXAGONAL-HV-ASSISTANT.md)
 
 ### Qualidade, testes e Sonar
-- Cobertura JUnit ampla (controllers, services, ingestion, advisor, DTOs, config)
+- Cobertura JUnit ampla (controllers, use cases, adapters, ingestion, advisor, DTOs, config)
 - JaCoCo + plugin SonarQube (`sonar.projectKey=hv-assistant`)
 - Issues Sonar corrigidas (ex.: método `register` no feedback, null-safety no advisor)
 

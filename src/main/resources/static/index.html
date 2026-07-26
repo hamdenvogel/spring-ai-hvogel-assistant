@@ -58,7 +58,55 @@
             flex-wrap: wrap;
         }
 
-        .brand img { height: 72px; width: auto; display: block; }
+        .brand img {
+            height: 72px;
+            width: auto;
+            display: block;
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                        filter 0.35s ease;
+            transform-origin: center center;
+            will-change: transform;
+        }
+
+        .brand-link {
+            display: inline-flex;
+            align-items: center;
+            border: 0;
+            padding: 0.15rem;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 10px;
+            line-height: 0;
+        }
+
+        /* Hover: leve elevação + brilho suave (sem giro) */
+        .brand-link:hover img,
+        .brand-link:focus-visible img {
+            transform: translateY(-3px) scale(1.03);
+            filter: brightness(1.06) drop-shadow(0 8px 16px rgba(0, 70, 130, 0.18));
+        }
+
+        .brand-link:focus-visible {
+            outline: 2px solid var(--brand-light);
+            outline-offset: 4px;
+        }
+
+        .brand-link:active img {
+            transform: translateY(-1px) scale(1.01);
+            transition-duration: 0.12s;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .brand img {
+                transition: none;
+            }
+            .brand-link:hover img,
+            .brand-link:focus-visible img,
+            .brand-link:active img {
+                transform: none;
+                filter: none;
+            }
+        }
 
         .header-actions {
             display: flex;
@@ -76,6 +124,14 @@
             padding: 0.35rem 0.65rem;
             border-radius: 999px;
             white-space: nowrap;
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                        background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .badge:hover {
+            transform: translateY(-1px) scale(1.04);
+            background: rgba(0, 119, 182, 0.15);
+            border-color: rgba(0, 119, 182, 0.3);
         }
 
         .btn-ghost, .btn-export {
@@ -87,7 +143,8 @@
             font-size: 0.82rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.15s, color 0.15s, border-color 0.15s;
+            transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease,
+                        transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
@@ -96,6 +153,28 @@
         .btn-ghost:hover, .btn-export:hover:not(:disabled) {
             background: var(--brand-dark);
             color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0, 70, 130, 0.22);
+        }
+
+        .btn-ghost:focus-visible, .btn-export:focus-visible {
+            outline: 2px solid var(--brand-light);
+            outline-offset: 2px;
+        }
+
+        .btn-ghost:active, .btn-export:active:not(:disabled) {
+            transform: translateY(0) scale(0.97);
+            box-shadow: 0 2px 6px rgba(0, 70, 130, 0.18);
+            transition-duration: 0.1s;
+        }
+
+        /* Ícones dos botões de exportar acompanham o hover */
+        .btn-export svg {
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .btn-export:hover:not(:disabled) svg {
+            transform: translateY(1px) scale(1.08);
         }
 
         .btn-export:disabled {
@@ -104,6 +183,19 @@
         }
 
         .export-group { display: flex; gap: 0.35rem; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .badge, .btn-ghost, .btn-export, .btn-export svg {
+                transition: none;
+            }
+            .badge:hover,
+            .btn-ghost:hover, .btn-export:hover:not(:disabled),
+            .btn-ghost:active, .btn-export:active:not(:disabled),
+            .btn-export:hover:not(:disabled) svg {
+                transform: none;
+                box-shadow: none;
+            }
+        }
 
         .chat-card {
             flex: 1;
@@ -362,23 +454,52 @@
             background: #fafbfc;
         }
 
-        #form { display: flex; gap: 0.65rem; align-items: center; }
+        #form {
+            display: flex;
+            gap: 0.65rem;
+            align-items: stretch;
+        }
+
+        .input-wrap {
+            flex: 1;
+            position: relative;
+            min-width: 0;
+        }
 
         #input {
-            flex: 1;
-            padding: 0.85rem 1rem;
+            width: 100%;
+            padding: 0.85rem 4.5rem 0.85rem 1rem;
             border: 1px solid var(--border);
             border-radius: 12px;
             font-size: 0.95rem;
             outline: none;
             transition: border-color 0.15s, box-shadow 0.15s;
             background: #fff;
+            height: 100%;
+            box-sizing: border-box;
         }
 
         #input:focus {
             border-color: var(--brand-light);
             box-shadow: 0 0 0 3px rgba(72, 169, 230, 0.2);
         }
+
+        .char-counter {
+            position: absolute;
+            right: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.72rem;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-muted);
+            font-weight: 600;
+            user-select: none;
+            pointer-events: none;
+            line-height: 1;
+        }
+
+        .char-counter.near-limit { color: #b45309; }
+        .char-counter.at-limit { color: #b91c1c; }
 
         #send {
             padding: 0.85rem 1.35rem;
@@ -391,6 +512,7 @@
             cursor: pointer;
             transition: opacity 0.15s, transform 0.1s;
             white-space: nowrap;
+            align-self: stretch;
         }
 
         #send:hover:not(:disabled) { opacity: 0.92; }
@@ -421,6 +543,15 @@
             font-weight: 700;
             color: var(--brand-dark);
             letter-spacing: 0.02em;
+            display: inline-block;
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                        color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .app-footer .brand-name:hover {
+            transform: translateY(-1px) scale(1.04);
+            color: var(--brand-mid);
+            text-shadow: 0 3px 10px rgba(0, 70, 130, 0.18);
         }
 
         .app-footer .sep {
@@ -437,6 +568,31 @@
             padding: 0.15rem 0.5rem;
             border-radius: 6px;
             font-size: 0.72rem;
+            display: inline-block;
+            cursor: default;
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                        background 0.3s ease, border-color 0.3s ease,
+                        box-shadow 0.3s ease;
+        }
+
+        .app-footer .version:hover {
+            transform: translateY(-1px) scale(1.05);
+            background: rgba(0, 119, 182, 0.14);
+            border-color: rgba(0, 119, 182, 0.28);
+            box-shadow: 0 4px 12px rgba(0, 70, 130, 0.16);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .app-footer .brand-name,
+            .app-footer .version {
+                transition: none;
+            }
+            .app-footer .brand-name:hover,
+            .app-footer .version:hover {
+                transform: none;
+                box-shadow: none;
+                text-shadow: none;
+            }
         }
 
         .toast {
@@ -462,12 +618,265 @@
             opacity: 1;
         }
 
+        .btn-ghost-action:hover { background: var(--brand-dark); color: #fff; }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+
+        .modal-backdrop.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            width: min(520px, 100%);
+            max-height: min(88vh, 720px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 24px 64px rgba(0, 70, 130, 0.22);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(12px) scale(0.98);
+            transition: transform 0.22s ease;
+        }
+
+        .modal-backdrop.open .modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            padding: 1.15rem 1.25rem 1rem;
+            border-bottom: 1px solid var(--border);
+            background:
+                linear-gradient(135deg, rgba(0, 70, 130, 0.06), rgba(72, 169, 230, 0.08));
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .modal-header-text h2 {
+            margin: 0 0 0.25rem;
+            font-size: 1.15rem;
+            color: var(--brand-dark);
+        }
+
+        .modal-header-text p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .modal-close {
+            border: 1px solid var(--border);
+            background: #fff;
+            border-radius: 8px;
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .modal-close:hover {
+            border-color: var(--brand-light);
+            color: var(--brand-dark);
+        }
+
+        .modal-body {
+            padding: 1.1rem 1.25rem;
+            overflow-y: auto;
+        }
+
+        .about-loading,
+        .about-error {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-height: 120px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .about-error { color: #b91c1c; }
+
+        .about-hero {
+            margin-bottom: 1rem;
+        }
+
+        .about-hero .app-name {
+            margin: 0 0 0.35rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--brand-dark);
+        }
+
+        .about-hero .app-desc {
+            margin: 0 0 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .about-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .about-meta .chip {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--brand-mid);
+            background: rgba(0, 119, 182, 0.08);
+            border: 1px solid rgba(0, 119, 182, 0.15);
+            padding: 0.25rem 0.55rem;
+            border-radius: 999px;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.65rem;
+            margin-bottom: 1rem;
+        }
+
+        .about-item {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.65rem 0.75rem;
+        }
+
+        .about-item .label {
+            display: block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--brand-mid);
+            margin-bottom: 0.2rem;
+        }
+
+        .about-item .value {
+            font-size: 0.85rem;
+            color: var(--text);
+            word-break: break-word;
+        }
+
+        .about-section-title {
+            margin: 0.85rem 0 0.45rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--brand-mid);
+        }
+
+        .about-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+
+        .about-tag {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--brand-dark);
+            background: rgba(0, 70, 130, 0.06);
+            border: 1px solid rgba(0, 70, 130, 0.12);
+            padding: 0.25rem 0.55rem;
+            border-radius: 8px;
+        }
+
+        .about-endpoints {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .about-endpoints li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.82rem;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.45rem 0.6rem;
+        }
+
+        .method {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #fff;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            min-width: 3.2rem;
+            text-align: center;
+        }
+
+        .method.get { background: var(--brand-mid); }
+        .method.post { background: var(--brand-dark); }
+
+        .modal-footer {
+            padding: 0.85rem 1.25rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-ghost-action {
+            padding: 0.5rem 0.9rem;
+            border: 1px solid var(--brand-dark);
+            border-radius: 10px;
+            background: transparent;
+            color: var(--brand-dark);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 119, 182, 0.2);
+            border-top-color: var(--brand-mid);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         @media (max-width: 600px) {
             .brand img { height: 56px; }
             .header { padding: 0.85rem 1rem; }
             .badge { display: none; }
             .msg { max-width: 95%; }
             .export-group .btn-export span.label { display: none; }
+            .about-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -475,7 +884,9 @@
     <div class="app">
         <header class="header">
             <div class="brand">
-                <img src="/logo_hvogel_brand.png" alt="Hvogel - Fábrica de Software">
+                <button type="button" class="brand-link" id="btnLogoSobre" title="Sobre o assistente" aria-haspopup="dialog" aria-label="Abrir sobre o HV Assistant">
+                    <img src="/logo_hvogel_brand.png" alt="Hvogel - Fábrica de Software">
+                </button>
             </div>
             <div class="header-actions">
                 <span class="badge">Assistente de RH</span>
@@ -489,6 +900,7 @@
                         <span class="label">PDF</span>
                     </button>
                 </div>
+                <button type="button" class="btn-ghost" id="btnSobre" title="Informações do assistente" aria-haspopup="dialog">Sobre</button>
                 <button type="button" class="btn-ghost" id="newChat">Nova conversa</button>
             </div>
         </header>
@@ -509,7 +921,10 @@
 
             <div class="input-area">
                 <form id="form">
-                    <input id="input" type="text" placeholder="Digite sua pergunta sobre políticas de RH..." autocomplete="off" required>
+                    <div class="input-wrap">
+                        <input id="input" type="text" maxlength="200" placeholder="Digite sua pergunta sobre políticas de RH..." autocomplete="off" required aria-describedby="charCounter">
+                        <span class="char-counter" id="charCounter" aria-live="polite">0 / 200</span>
+                    </div>
                     <button type="submit" id="send">Enviar</button>
                 </form>
                 <p class="footer-note">Respostas baseadas no manual oficial de RH da Hvogel</p>
@@ -519,11 +934,33 @@
         <footer class="app-footer" id="appFooter">
             <span>Desenvolvido por <span class="brand-name">Hvogel</span> Tecnologia Ltda.</span>
             <span class="sep" aria-hidden="true">·</span>
-            <span class="version" id="appVersion">v1.0.0.0</span>
+            <span class="version" id="appVersion">v0.2.0</span>
         </footer>
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <div class="modal-backdrop" id="sobreModal" role="dialog" aria-modal="true" aria-labelledby="sobreTitle" hidden>
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-header-text">
+                    <h2 id="sobreTitle">Sobre o assistente</h2>
+                    <p>Metadados em tempo real de <code>/api/sobre</code></p>
+                </div>
+                <button type="button" class="modal-close" id="btnCloseSobre" aria-label="Fechar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="sobreBody">
+                <div class="about-loading"><span class="spinner"></span> Carregando…</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-ghost-action" id="btnFecharSobre">Fechar</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const RAG_FALLBACK_MARKER = "Não encontrei essa informação nas políticas oficiais da Hvogel";
@@ -531,14 +968,36 @@
         const chat = document.getElementById("chat");
         const form = document.getElementById("form");
         const input = document.getElementById("input");
+        const charCounter = document.getElementById("charCounter");
         const sendBtn = document.getElementById("send");
         const newChatBtn = document.getElementById("newChat");
         const exportTxtBtn = document.getElementById("exportTxt");
         const exportPdfBtn = document.getElementById("exportPdf");
         const toast = document.getElementById("toast");
+        const btnSobre = document.getElementById("btnSobre");
+        const btnLogoSobre = document.getElementById("btnLogoSobre");
+        const sobreModal = document.getElementById("sobreModal");
+        const sobreBody = document.getElementById("sobreBody");
+
+        const MAX_INPUT_LENGTH = 200;
 
         let conversationLog = [];
         let lastUserQuestion = "";
+
+        function updateCharCounter() {
+            const len = input.value.length;
+            charCounter.textContent = len + " / " + MAX_INPUT_LENGTH;
+            charCounter.classList.toggle("near-limit", len >= MAX_INPUT_LENGTH - 20 && len < MAX_INPUT_LENGTH);
+            charCounter.classList.toggle("at-limit", len >= MAX_INPUT_LENGTH);
+        }
+
+        function setInputValue(text) {
+            input.value = String(text || "").slice(0, MAX_INPUT_LENGTH);
+            updateCharCounter();
+        }
+
+        input.addEventListener("input", updateCharCounter);
+        updateCharCounter();
 
         function getConversationId() {
             let id = localStorage.getItem("conversationId");
@@ -594,7 +1053,7 @@
         function bindSuggestions() {
             document.querySelectorAll(".suggestion").forEach(btn => {
                 btn.addEventListener("click", () => {
-                    input.value = btn.dataset.q;
+                    setInputValue(btn.dataset.q);
                     form.requestSubmit();
                 });
             });
@@ -603,6 +1062,108 @@
         newChatBtn.addEventListener("click", startNewConversation);
         bindSuggestions();
         updateExportButtons();
+
+        function formatDateTime(value) {
+            if (!value) return "—";
+            try {
+                return new Date(value).toLocaleString("pt-BR", {
+                    dateStyle: "short",
+                    timeStyle: "medium"
+                });
+            } catch {
+                return String(value);
+            }
+        }
+
+        function parseEndpoint(line) {
+            const m = String(line || "").match(/^(GET|POST|PUT|DELETE|PATCH)\s+(.+)$/i);
+            if (!m) return { method: "", path: line, methodClass: "" };
+            const method = m[1].toUpperCase();
+            return {
+                method,
+                path: m[2],
+                methodClass: method === "GET" ? "get" : "post"
+            };
+        }
+
+        function renderAbout(info) {
+            const formatos = (info.formatosSuportados || [])
+                .map(f => '<span class="about-tag">' + escapeHtml(f) + "</span>")
+                .join("");
+            const endpoints = (info.endpoints || []).map(ep => {
+                const p = parseEndpoint(ep);
+                return '<li><span class="method ' + p.methodClass + '">' + escapeHtml(p.method || "—") +
+                    "</span><span>" + escapeHtml(p.path) + "</span></li>";
+            }).join("");
+
+            sobreBody.innerHTML =
+                '<div class="about-hero">' +
+                    '<p class="app-name">' + escapeHtml(info.aplicacao || "HV Assistant") + "</p>" +
+                    '<p class="app-desc">' + escapeHtml(info.descricao || "") + "</p>" +
+                    '<div class="about-meta">' +
+                        '<span class="chip">v' + escapeHtml(info.versao || "—") + "</span>" +
+                        '<span class="chip">' + escapeHtml(info.autor || "—") + "</span>" +
+                    "</div>" +
+                "</div>" +
+                '<div class="about-grid">' +
+                    '<div class="about-item"><span class="label">Build / alteração</span><span class="value">' +
+                        formatDateTime(info.dataHoraAlteracao) + "</span></div>" +
+                    '<div class="about-item"><span class="label">Consultado em</span><span class="value">' +
+                        formatDateTime(info.consultadoEm) + "</span></div>" +
+                    '<div class="about-item"><span class="label">Java</span><span class="value">' +
+                        escapeHtml(info.javaVersion || "—") + "</span></div>" +
+                    '<div class="about-item"><span class="label">Spring Boot</span><span class="value">' +
+                        escapeHtml(info.springBootVersion || "—") + "</span></div>" +
+                "</div>" +
+                '<p class="about-section-title">Capacidades</p>' +
+                '<div class="about-tags">' + (formatos || '<span class="about-tag">—</span>') + "</div>" +
+                '<p class="about-section-title">Endpoints</p>' +
+                '<ul class="about-endpoints">' + (endpoints || "<li>—</li>") + "</ul>";
+        }
+
+        function openSobreModal() {
+            sobreModal.hidden = false;
+            requestAnimationFrame(() => sobreModal.classList.add("open"));
+            document.body.style.overflow = "hidden";
+            document.getElementById("btnCloseSobre").focus();
+            loadSobre();
+        }
+
+        function closeSobreModal() {
+            sobreModal.classList.remove("open");
+            document.body.style.overflow = "";
+            setTimeout(() => { sobreModal.hidden = true; }, 200);
+            btnSobre.focus();
+        }
+
+        async function loadSobre() {
+            sobreBody.innerHTML = '<div class="about-loading"><span class="spinner"></span> Carregando…</div>';
+            try {
+                const res = await fetch("/api/sobre");
+                if (!res.ok) {
+                    sobreBody.innerHTML = '<div class="about-error">Não foi possível carregar o Sobre (' + res.status + ").</div>";
+                    return;
+                }
+                const info = await res.json();
+                if (info.versao) {
+                    document.getElementById("appVersion").textContent = "v" + info.versao;
+                }
+                renderAbout(info);
+            } catch {
+                sobreBody.innerHTML = '<div class="about-error">Falha de rede ao consultar /api/sobre.</div>';
+            }
+        }
+
+        btnSobre.addEventListener("click", openSobreModal);
+        btnLogoSobre.addEventListener("click", openSobreModal);
+        document.getElementById("btnCloseSobre").addEventListener("click", closeSobreModal);
+        document.getElementById("btnFecharSobre").addEventListener("click", closeSobreModal);
+        sobreModal.addEventListener("click", (e) => {
+            if (e.target === sobreModal) closeSobreModal();
+        });
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && sobreModal.classList.contains("open")) closeSobreModal();
+        });
 
         (async function loadAppInfo() {
             try {
@@ -938,7 +1499,7 @@
             event.preventDefault();
             const message = input.value.trim();
             if (!message) return;
-            input.value = "";
+            setInputValue("");
             await sendMessage(message);
         });
 

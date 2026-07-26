@@ -12,6 +12,6 @@ spring:
 
 logging:
   level:
-    br.com.hvogel.hv_assistant.chat.PromptLoggingAdvisor: INFO
+    br.com.hvogel.hv_assistant.adapter.out.springai.PromptLoggingAdvisor: INFO
     root: INFO
 

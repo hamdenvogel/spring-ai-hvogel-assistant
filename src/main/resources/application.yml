@@ -34,8 +34,14 @@ spring:
 # bloco proprio do projeto (nao e do framework)
 app:
   info:
-    version: 1.0.0.0
+    # Fallback se BuildProperties (build-info) ainda nao existir; UI remove -SNAPSHOT
+    version: 0.2.0
     developer: Hvogel Tecnologia Ltda.
+  about:
+    autor: Hvogel Tecnologia Ltda.
+    aplicacao: HV Assistant
+    descricao: Assistente virtual de RH com RAG (Spring AI + Claude)
+    versao: 0.2.0
   ingest:
     auto-on-startup: true
     document: classpath:/docs/hvogel_politicas_rh.pdf
@@ -48,5 +54,5 @@ app:
 # nivel DEBUG apenas para o advisor que loga prompt (IDA) e resposta (VOLTA)
 logging:
   level:
-    br.com.hvogel.hv_assistant.chat.PromptLoggingAdvisor: DEBUG
+    br.com.hvogel.hv_assistant.adapter.out.springai.PromptLoggingAdvisor: DEBUG
 
