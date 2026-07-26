@@ -1,0 +1,85 @@
+# GitLab CI — espelho do essencial do GitHub Actions (Fase 10).
+# Origem oficial: GitHub. Deploy Cloud Run continua só no GitHub (tag v*).
+# Precisa de Postgres (pgvector) + Redis Stack para os testes.
+
+stages:
+  - test
+  - docker
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Xmx1g"
+  FF_NETWORK_PER_BUILD: "true"
+  ANTHROPIC_API_KEY: "test-key"
+  OPENAI_API_KEY: "test-key"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/ragdb"
+  SPRING_DATASOURCE_USERNAME: "postgres"
+  SPRING_DATASOURCE_PASSWORD: "test"
+  SPRING_AI_CHAT_MEMORY_REDIS_HOST: "redis"
+  SPRING_AI_CHAT_MEMORY_REDIS_PORT: "6379"
+  SPRING_PROFILES_ACTIVE: "anthropic"
+  POSTGRES_DB: "ragdb"
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "test"
+
+default:
+  interruptible: true
+
+cache:
+  key: "${CI_COMMIT_REF_SLUG}-maven"
+  paths:
+    - .m2/repository/
+
+maven-package:
+  stage: test
+  image: eclipse-temurin:25-jdk
+  services:
+    - name: pgvector/pgvector:pg16
+      alias: postgres
+    - name: redis/redis-stack-server:latest
+      alias: redis
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq postgresql-client
+    - |
+      for i in $(seq 1 30); do
+        pg_isready -h postgres -U postgres -d ragdb && break
+        echo "aguardando postgres... ($i)"
+        sleep 2
+      done
+    - PGPASSWORD=test psql -h postgres -U postgres -d ragdb -c "CREATE EXTENSION IF NOT EXISTS vector;"
+  script:
+    - chmod +x mvnw
+    - ./mvnw -B clean package
+    - ls -lh target/*.jar
+  artifacts:
+    name: "hv-assistant-jar-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - target/hv-assistant-*.jar
+    exclude:
+      - target/*-sources.jar
+      - target/*-javadoc.jar
+    expire_in: 7 days
+    when: on_success
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+docker-build:
+  stage: docker
+  image: docker:27-cli
+  services:
+    - name: docker:27-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  needs:
+    - maven-package
+  script:
+    - docker info
+    - docker build -t hv-assistant:ci .
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
